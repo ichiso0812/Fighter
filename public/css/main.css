@@ -1,0 +1,129 @@
+
+* {
+    box-sizing: border-box;
+}
+h1,h2 {
+    text-align: center;
+    font-family: "Press Start 2P", serif;
+    font-size: 4em;
+    letter-spacing: 0.1em;
+}
+h2 {
+    font-size:1.3em
+}
+p, label {
+    display: block;
+    text-align: center;
+    font-family: "Noto Serif", serif;
+    font-size: 1.3em;;
+}
+label {
+    padding-top: 1em;
+}
+#choose_pseudo label {
+    margin-top: 5em;
+}
+#choose_pseudo p {
+    margin-top:2.5em;
+}
+body {
+    background-color: #121212;
+    color: #ebebeb;
+}
+input {
+    width: 50%;
+    margin-top: 2em;
+    border-radius: 8px;
+    background: none;
+    border-color:1px solid  white;
+    padding: 15px;
+    color: white;
+}
+#choose_pseudo .cta, #refresh    {
+    display: block;
+    margin: auto;
+    width: 50%;
+    margin-top: 2em;
+
+
+}
+button.cta  {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #ebebeb;
+    color: #121212;
+    font-family: "Press Start 2P", serif;
+    font-size: 1.3em;
+    cursor: pointer;
+}
+.room {
+    width:70%;
+    border-radius:5px;
+    display:flex;
+    justify-content:space-around;
+    border: 1px solid white;
+    align-items:center;
+    margin:auto;
+    margin-top: 2.5em;
+    padding: 1em;
+    transition-property: all;
+    transition-duration: 0.5s;
+}
+.room:hover{
+    background-color: #2e1400;
+}
+#list_room button.cta {
+    width:auto;
+}
+#create_room_form {
+    margin-top:2em;
+    text-align:center;
+}
+#create_room_form button {
+    margin-top: 1.5em;
+}
+#game_zone {
+    display:flex;
+    
+}
+
+#game_zone > div {
+    width:100%;
+    text-align: center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.active_players p{
+    font-family: "Press Start 2P", serif;
+    font-size: 2em;
+}
+#players_connected {
+    padding:0.5em;
+    width:85%;
+    max-height:40%;
+    overflow-y: scroll;
+}
+#players_connected > div:not(h2) {
+    font-size:1.2em;
+    border:1px solid white;
+    margin:0.5em;
+    padding:0.3em;
+}
+
+#game_chat {
+    border:1px solid white;
+    margin-top:2em;
+    max-height:30%;
+    min-height:30%;
+    overflow-y:scroll;
+    width:85%;
+}
+#game_chat p {
+    font-size:1.15em;
+    text-align:left;
+    margin:5px;
+}
+#quit_room {
+    margin-top:1em;
+}
