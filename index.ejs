@@ -401,18 +401,20 @@
             ctx.clearRect(0,0,game_dim.width, game_dim.height)
             var active_players = []
            
-            if (Players[0] && Players[0] !=Window){
+            if (Players[0]){
                 Players[0].color = "yellow"
                 active_players.push(Players[0])
             }
             
-            if (Players[1] && Players[1] !=Window){
+            if (Players[1]){
                 active_players.push(Players[1])
                 Players[1].color = "purple"
             }
 
             active_players.forEach(function(player, index){
-                player.update()
+                if (typeof player.update != "undefined"){
+                    player.update()
+                }
                 $(".active_players .player").eq(index).html(player.name)
             })
         
