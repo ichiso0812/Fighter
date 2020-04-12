@@ -401,12 +401,12 @@
             ctx.clearRect(0,0,game_dim.width, game_dim.height)
             var active_players = []
            
-            if (Players[0]){
+            if (Players[0] && Players[0] !=Window]){
                 Players[0].color = "yellow"
                 active_players.push(Players[0])
             }
             
-            if (Players[1]){
+            if (Players[1] && Players[1] !=Window){
                 active_players.push(Players[1])
                 Players[1].color = "purple"
             }
