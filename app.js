@@ -134,4 +134,4 @@ io.sockets.on('connection', function(socket) {
     })
 });
 
-server.listen(8050)
+server.listen(process.env.PORT)
