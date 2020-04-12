@@ -400,9 +400,12 @@
             requestAnimationFrame(animate)
             ctx.clearRect(0,0,game_dim.width, game_dim.height)
 
-            Players[0].color = "yellow"
+           
+            if (Players[0]){
+                Players[0].color = "yellow"
+                active_players = [Players[0]]
+            }
             
-            active_players =[Players[0]]
             if (Players[1]){
                 active_players.push(Players[1])
                 Players[1].color = "purple"
