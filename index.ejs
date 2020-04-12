@@ -475,7 +475,7 @@
            
             $(".room_name").html("room name: " + room_name)
             //NEW CONNECTION
-            socket = io.connect("http://localhost:8050?room_name=" +room_name)
+            socket = io.connect(location +"?room_name=" +room_name)
 
             socket.emit("add_player", {pseudo: pseudo})
 
