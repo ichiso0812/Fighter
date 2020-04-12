@@ -113,12 +113,8 @@
                 socket.emit("end_round", {looser:this.name})
                 Players.forEach((_player, index)=>{
                     if (_player.name==this.name){
-                        setTimeout(function(){
-                            Players.splice(index, 1)
-                            Players.push(this)
-                            
-                        },2500)
-
+                        Players.splice(index, 1)
+                        Players.push(this)
                         this.life = 1  
                         Bullets = []
                         CircleBullets = []
@@ -411,9 +407,9 @@
             }
 
             active_players.forEach(function(player, index){
-                if (typeof player.update != "undefined"){
-                    player.update()
-                }
+                
+                player.update()
+                
                 $(".active_players .player").eq(index).html(player.name)
             })
         
