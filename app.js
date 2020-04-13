@@ -6,7 +6,7 @@ var ejs = require("ejs")
 var session = require("cookie-session")
 var bodyParser = require("body-parser")
 var urlEncodedParser = bodyParser.urlencoded({extended: false})
-app.use(express.static('public'))
+app.use(express.static('assets'))
 app.use(session({secret:"monsecret"}))
 
 var rooms = {}
@@ -134,4 +134,5 @@ io.sockets.on('connection', function(socket) {
     })
 });
 
-server.listen(process.env.PORT)
+//server.listen(process.env.PORT)
+server.listen(8050)

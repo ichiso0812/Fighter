@@ -15,14 +15,13 @@
             <label>Rentre un pseudo et rentre dans ton adversaire !<br/>
             <input type="text" name="_pseudo" minlength=3 maxlength=12  id="_pseudo"/></label>
             <button class="cta choose_pseudo_submit">Rejoindre</button>
-            
         </div>
         <div id="rooms_list">
             <h1>Liste des games</h1>
             <button class="cta" id="refresh">Refresh</button>
             <div class="list_room">
                 <%Object.entries(rooms).forEach(function(room){%>
-                    <%if( room["player"] && room["players"].length != 0){%>
+                    <%if( room["players"] && room["players"].length != 0){%>
                         <div class="room">
                             <div>
                                 <h2><%=room[0]%></h2>
@@ -38,23 +37,15 @@
                 <input type="text" name="room_name" id="room_name_input" minlength=3 maxlength=20 placeholder="nom de la room"/>
                 <br/><button class="cta" id="submit_new_room">Créer une room</button>
             </div>
-           
         </div>
         <div id="game">
             <div id="game_zone">
                 <canvas id="canvas_game" width="1080" height="760" style="background-color:#080808;border:1px solid #ebebeb;"></canvas>
                 <div>
-                    <span class="room_name">
-
-                    </span>
+                    <span class="room_name"></span>
                     <div class="active_players">
                         <p>
-                            <span class="player">
-                                
-                            </span> VS
-                            <span class="player">
-                                
-                            </span>
+                            <span class="player"></span> VS <span class="player"></span>
                         </p> 
                     </div>
                     
@@ -62,246 +53,25 @@
                         <div>
                             <h2>futurs ball'z</h2>
                         </div>
-                        <div>
-                            Pepito
-                        </div>
-                        <div>
-                            Aniahanami
-                        </div>
-                        <div>
-                            4rka
-                        </div>
-                         
                     </div>
+
                     <div id="game_chat">
                         <div>
-
                         </div>
-                        
                     </div>
-                   
-                    <button id="quit_room" class="cta">S'en aller comme un pleutre</button>
-                    <div id="counter">
 
-                    </div>
+                    <button id="quit_room" class="cta">S'en aller comme un pleutre</button>
+                    <div id="counter"></div>
                 </div>
             </div>
-            
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script id="/player.js">
-    var Players = []
-    class Player {
-        constructor(x, y, name){
-            this.x = x
-            this.y = y
-            this.radius=20
-            this.name = name
-            this.speed=10
-            this.life=1
-            this.color="red"
-            Players.push(this)
-        }
-        update(){
-            if (this.life >= 0){
-                this.draw()
-                this.coll_bullet()
-                this.coll_circle_bullet()
-            } else {
-                socket.emit("end_round", {looser:this.name})
-                Players.forEach((_player, index)=>{
-                    if (_player.name==this.name){
-                        Players.splice(index, 1)
-                        Players.push(this)
-                        this.life = 1  
-                        Bullets = []
-                        CircleBullets = []
-                        $("#game_chat").append("<p>La ball'z "+this.name+" n'a pas été à la hauteur !</p>")
-                    }
-                })
-            }
-        }
-        draw(){
-            ctx.beginPath();
-            ctx.fillStyle=this.color
-            ctx.shadowBlur = 20
-            ctx.strokeStyle = "red"
-            ctx.arc(this.x,this.y, this.radius, 0, Math.PI*2, false)
-            ctx.fill()
-            if (this.life==1){
-                ctx.lineWidth = 2
-                ctx.stroke()
-                ctx.lineWidth = 1
-            }
-            ctx.shadowBlur = 0
-            ctx.closePath();
-        }
-        coll_bullet(){
-            Bullets.forEach((bullet,index)=>{
-                if (bullet.player!=this.name) {
-                    var d2 = (bullet.x-this.x)*(bullet.x-this.x) + (bullet.y - this.y)*(bullet.y - this.y)
-                    if (d2 <= (bullet.radius + this.radius)*(bullet.radius + this.radius)){
-                        delete Bullets[index]
-                        this.life -=1;
-                    }
-                }
-                
-            })  
-        }
-        coll_circle_bullet(){
-            CircleBullets.forEach((circle_bullet, index)=>{
-                if (circle_bullet.player != this.name){
-                    if (circle_bullet.state == "big"){
-                        var d2 = (circle_bullet.x-this.x)*(circle_bullet.x-this.x) + (circle_bullet.y - this.y)*(circle_bullet.y - this.y)
-                        if (d2 <= (circle_bullet.radius + this.radius)*(circle_bullet.radius + this.radius)){
-                            delete CircleBullets[index]
-                            this.life -=1;
-                        }
-                    }else {
-                        circle_bullet.childrens.forEach((bullet_child, index)=>{
-                            var d2 = (bullet_child.x-this.x)*(bullet_child.x-this.x) + (bullet_child.y - this.y)*(bullet_child.y - this.y)
-                            if (d2 <= (circle_bullet.childrens_radius + this.radius)*(circle_bullet.childrens_radius + this.radius)){
-                                delete circle_bullet.childrens[index]
-                                this.life -=1;
-                            }
-                        })
-                    }
-                }
-            })
-        }
-        static find(pseudo){
-            var result = ""
-            Players.forEach(function(player){
-                if (player.name==pseudo){
-                    result = player
-                }
-            })
-            return result
-        }
-    }
-    </script>
-    <script id="/weapons.js">
-        var can_shoot_bullet = true
-        var Bullets = []
-        class Bullet {
-            constructor(x,y, destination_x, destination_y, player){
-                this.x = x
-                this.y = y
-                this.destination_x =  destination_x
-                this.destination_y = destination_y
-                
-                this.dx = (this.destination_x - this.x)
-                this.dy = (this.destination_y - this.y)
-                this.mag = (Math.sqrt(this.dx*this.dx+this.dy*this.dy))
-                this.player = player
-                this.speed=18
-                
-                this.velocity_x = (this.dx/this.mag)*this.speed
-                this.velocity_y = (this.dy/this.mag)*this.speed
-                this.radius = 10
-                this.color="red"
-                this.reload_time = 350
-                Bullets.push(this)
-            }
-            update(){
-                this.color=Player.find(this.player).color
-                ctx.beginPath();
-                ctx.fillStyle=this.color
-                ctx.arc(this.x,this.y, this.radius, 0, Math.PI*2, false)
-                ctx.fill()
-                ctx.closePath();
-        
-                this.x+=this.velocity_x
-                this.y +=this.velocity_y
-               
-            }
-        }
-        var can_shot_circle_bullet = true
-        var CircleBullets = []
-        class CircleBullet {
-            constructor(x,y,destination_x, destination_y,player){
-                this.x = x
-                this.y = y
-                this.destination_x = destination_x
-                this.destination_y = destination_y
-                this.speed = 8
-                this.dx = (this.destination_x - this.x)
-                this.dy = (this.destination_y - this.y)
-                this.mag = (Math.sqrt(this.dx*this.dx+this.dy*this.dy))
-                this.childrens = []
-                this.childrens_number = 8
-                this.player = player
-                this.state = "big"
-                this.color = "red"
-                this.velocity_x = (this.dx/this.mag)*this.speed
-                this.velocity_y = (this.dy/this.mag)*this.speed
-                this.radius = 20
-                this.childrens_radius = 15
-                this.childrens_speed = 12
-
-                this.reload_time = 1500
-                CircleBullets.push(this)
-            }
-
-            update(){
-                this.color=Player.find(this.player).color
-                if (this.state=="big"){
-
-                    ctx.beginPath();
-                    ctx.fillStyle=this.color
-                    ctx.strokeSyle = "red"
-                    ctx.arc(this.x,this.y, this.radius, 0, Math.PI*2, false)
-                    ctx.stroke()
-                    ctx.fill()
-                    ctx.closePath();
-
-                    this.x += this.velocity_x
-                    this.y += this.velocity_y
-
-                    //transition
-                    if ((this.x>=this.destination_x-this.radius && this.x <=this.destination_x+this.radius ) && (this.y>=this.destination_y-this.radius && this.y <=this.destination_y+this.radius )){
-                        this.create_childrens()
-                        this.state = "many"
-                    }
-                }else if (this.state=="many"){
-                    this.childrens.forEach((child)=>{
-                        ctx.beginPath();
-                        ctx.fillStyle=this.color
-                        ctx.strokeSyle = "red"
-                        ctx.arc(child.x,child.y, this.childrens_radius, 0, Math.PI*2, false)
-                        ctx.stroke()
-                        ctx.fill()
-                        ctx.closePath();
-
-                        child.x += child.velocity_x
-                        child.y += child.velocity_y
-                    })
-                    
-                     
-                }
-            }
-            create_childrens(){
-                for (var i=0; i<this.childrens_number; i++){ 
-                    this.childrens.push(
-                        {
-                            x:this.x + this.radius*(Math.cos( ((Math.PI*2)/this.childrens_number)*(i+1))), 
-                            y:this.y + this.radius*(Math.sin( ((Math.PI*2)/this.childrens_number)*(i+1)))
-                        }
-                    )
-                }
-                this.childrens.forEach((child)=>{
-                    var dx = (child.x - this.x)
-                    var dy = (child.y - this.y)
-                    var mag = (Math.sqrt(dx*dx+dy*dy))
-                    child.velocity_x = (dx/mag)*this.childrens_speed
-                    child.velocity_y = (dy/mag)*this.childrens_speed
-                })
-            }
-        }
-        
-    </script>
+    
+    <script src="/js/player.js"></script>
+    <script src="/js/weapons.js"></script>
+    <script src="/js/connexion.js"></script>
     <script>
         //LEAVE ROOM
         $("#quit_room").click(function(e){
@@ -312,75 +82,20 @@
             //location.href="/"
             $("#players_connected").find("."+pseudo).remove()
         })
-        //choose pseudo
-        $(".choose_pseudo_submit").click(function(e){
-            $.post(
-                "/add-player/"+$("#_pseudo").val(),
-                JSON.stringify({pseudo: $("#_pseudo").val()}),
-                function(data){
-                    if (data=="success"){
-                        $("#choose_pseudo").hide();
-                        $("#rooms_list").show()
-                        pseudo = $("#_pseudo").val()
-                    }else if (data="already_exist"){
-                        $("#choose_pseudo").append("<p>Ce pseudo existe déja</p>")
-                    }
-                }, 
-                "text"
-            )
-        })
-        //create room
-        $("#submit_new_room").click(function(){
-            $.post(
-                "/create-room/"+$("#room_name_input").val(),
-                {room_name: $("#room_name_input").val()},
-                function(data){
-                    if (data=="success"){
-                        room_name = $("#room_name_input").val()
-                        initialize()
-                        
-                    }else if (data=="already_exist"){
-                        $("#submit_new_room").after("<p>La room existe déja !</p>")
-                    }else if (data=="empty_string"){
-                        $("#submit_new_room").after("<p>Rentre une valeur, voyons !</p>")
-                    }
-                },
-                "text"
-            )
-        })
-        //refresh and join room
-        $("#refresh").click(function(e){
-            $.get(
-                "/get_rooms",
-                JSON.stringify({}),
-                function(data){
-                    $(".list_room").html("")
-                    data.forEach(function(_room){
-                        $(".list_room").append("<div class='room'><div><h2>"+_room+"</h2></div><div><button class='cta join_room' id='join_room_"+_room+"' data-name='"+_room+"'>Rejoindre</button></div></div>")
-                        $("#join_room_"+_room).click(function(){
-                            room_name = $(this).attr("data-name")
-                            initialize()
-                        })
-                    })
-                    
-                },
-                "json"
-            )
-        });
-        $(".join_room").click(function(){
-            room_name = $(this).attr("data-name")
-            initialize()
-        })
+        
         //canvas
         var canvas_game_dom = $("#canvas_game")
         var game_dim = {width: parseInt(canvas_game_dom.attr("width")), height: parseInt(canvas_game_dom.attr("height"))}
         var ctx = canvas_game_dom[0].getContext("2d")
+        var game_state = "play"
         var keys = {}
         var room_name = ""
         var pseudo = ""
         var socket = {}
+        var new_round_timer = 2
+        var new_round_timer_launched = false
+        var kills = {}
         $(document).keydown(function(e){
-
             keys[e.keyCode] = true
         }).keyup(function(e){
             delete keys[e.keyCode]
@@ -390,6 +105,7 @@
             mouse_coords.x = e.clientX
             mouse_coords.y = e.clientY
         })
+        $("#game, #rooms_list").hide()
 
         function animate(){
             requestAnimationFrame(animate)
@@ -406,67 +122,93 @@
                 Players[1].color = "purple"
             }
 
-            active_players.forEach(function(player, index){
+           
+            if (game_state=="play"){
+
+                active_players.forEach(function(player, index){
                 
-                player.update()
+                    player.update()
+                    
+                    $(".active_players .player").eq(index).html(player.name)
+                })
+                Bullets.forEach(function(bullet){
+                    bullet.update()
+                })
+                CircleBullets.forEach(function(circle_bullet){
+                    circle_bullet.update()
+                })
+                //left
+                if (keys[81]){
+                    if (Player.find(pseudo).x-Player.find(pseudo).speed > 0){
+                        Player.find(pseudo).x-=  Player.find(pseudo).speed
+                    }
+                }
+                //up
+                if (keys[90]){
+                    if (Player.find(pseudo).y-Player.find(pseudo).speed > 0){
+                        Player.find(pseudo).y-=Player.find(pseudo).speed
+                    }
+                }
+                //right
+                if (keys[68]){
+                    if (Player.find(pseudo).x+Player.find(pseudo).speed < game_dim.width){
+                        Player.find(pseudo).x+= Player.find(pseudo).speed
+                    }
+                }
+                //down
+                if (keys[83]){
+                    if (Player.find(pseudo).y+Player.find(pseudo).speed < game_dim.height){
+                        Player.find(pseudo).y+=Player.find(pseudo).speed
+                    }
+                }
+                //space
+                if (Players.length >=  2 && keys[32]){
+                    if (can_shoot_bullet && (Player.find(pseudo)==Players[0] || Player.find(pseudo)==Players[1])){
+                        bullet = new Bullet(Player.find(pseudo).x,Player.find(pseudo).y, mouse_coords.x, mouse_coords.y, pseudo)
+                        socket.emit("shoot", {x:Player.find(pseudo).x, y:Player.find(pseudo).y, dest_x:mouse_coords.x, dest_y:mouse_coords.y, pseudo:pseudo})
+                        can_shoot_bullet = false
+                        setTimeout(function(){can_shoot_bullet=true}, bullet.reload_time)
+                    }
+                }
+                //alt
+                if (Players.length >=  2 && keys[69]){
+                    if (can_shot_circle_bullet && (Player.find(pseudo)==Players[0] || Player.find(pseudo)==Players[1])){
+                        circle_bullet = new CircleBullet(Player.find(pseudo).x,Player.find(pseudo).y, mouse_coords.x, mouse_coords.y, pseudo)
+                        socket.emit("circle_shot", {x:Player.find(pseudo).x, y:Player.find(pseudo).y, dest_x:mouse_coords.x, dest_y:mouse_coords.y, pseudo:pseudo})
+                        can_shot_circle_bullet = false
+                        setTimeout(function(){can_shot_circle_bullet=true}, circle_bullet.reload_time)
+                    }
+                }
                 
-                $(".active_players .player").eq(index).html(player.name)
-            })
-        
-            Bullets.forEach(function(bullet){
-                bullet.update()
-            })
-            CircleBullets.forEach(function(circle_bullet){
-                circle_bullet.update()
-            })
-            //left
-            if (keys[81]){
-                if (Player.find(pseudo).x-Player.find(pseudo).speed > 0){
-                    Player.find(pseudo).x-=  Player.find(pseudo).speed
+                socket.emit("player_pos", {pseudo:pseudo,x:Player.find(pseudo).x,y:Player.find(pseudo).y})
+            }else if (game_state=="new_round") {
+               
+                active_players.forEach(function(_player, index){                    
+                    $(".active_players .player").eq(index).html(player.name)
+                })
+                ctx.font="50px Noto serif"
+                ctx.fillStyle = "white"
+                
+                ctx.fillText(new_round_timer,game_dim.width/2, game_dim.height/2)
+                if (!new_round_timer_launched) {
+                    new_round_timer_launched = true
+                    launch_new_round_timer()
                 }
             }
-            //up
-            if (keys[90]){
-                if (Player.find(pseudo).y-Player.find(pseudo).speed > 0){
-                    Player.find(pseudo).y-=Player.find(pseudo).speed
-                }
-            }
-            //right
-            if (keys[68]){
-                if (Player.find(pseudo).x+Player.find(pseudo).speed < game_dim.width){
-                    Player.find(pseudo).x+= Player.find(pseudo).speed
-                }
-            }
-            //down
-            if (keys[83]){
-                if (Player.find(pseudo).y+Player.find(pseudo).speed < game_dim.height){
-                    Player.find(pseudo).y+=Player.find(pseudo).speed
-                }
-            }
-            //space
-            if (Players.length >=  2 && keys[32]){
-                if (can_shoot_bullet && (Player.find(pseudo)==Players[0] || Player.find(pseudo)==Players[1])){
-                    bullet = new Bullet(Player.find(pseudo).x,Player.find(pseudo).y, mouse_coords.x, mouse_coords.y, pseudo)
-                    socket.emit("shoot", {x:Player.find(pseudo).x, y:Player.find(pseudo).y, dest_x:mouse_coords.x, dest_y:mouse_coords.y, pseudo:pseudo})
-                    can_shoot_bullet = false
-                    setTimeout(function(){can_shoot_bullet=true}, bullet.reload_time)
-                }
-            }
-            //alt
-            if (Players.length >=  2 && keys[69]){
-                if (can_shot_circle_bullet && (Player.find(pseudo)==Players[0] || Player.find(pseudo)==Players[1])){
-                    circle_bullet = new CircleBullet(Player.find(pseudo).x,Player.find(pseudo).y, mouse_coords.x, mouse_coords.y, pseudo)
-                    socket.emit("circle_shot", {x:Player.find(pseudo).x, y:Player.find(pseudo).y, dest_x:mouse_coords.x, dest_y:mouse_coords.y, pseudo:pseudo})
-                    can_shot_circle_bullet = false
-                    setTimeout(function(){can_shot_circle_bullet=true}, circle_bullet.reload_time)
-                }
-            }
-            
-            socket.emit("player_pos", {pseudo:pseudo,x:Player.find(pseudo).x,y:Player.find(pseudo).y})
         }
-        
-        $("#game, #rooms_list").hide()
-        
+        function launch_new_round_timer(){
+            if (new_round_timer > 0){
+                setTimeout(function(){
+                    new_round_timer -=1
+                    launch_new_round_timer()
+                },1000)
+            } else {
+                game_state = "play"
+                new_round_timer = 2
+                new_round_timer_launched = false
+            }
+           
+        }
         
         //if the user is in a room
         function initialize(){
@@ -485,20 +227,18 @@
                 players.forEach(function(_player){
                     player = new Player(Players.length*200+100, 200, _player[0])
                     //$("#players_connected").append("<p class="+_player[0]+">"+_player[0]+"</p>")
-                    $("#players_connected").append("<div>"+_player[0]+"</div>")
+                    $("#players_connected").append("<div>"+_player[0]+ "-"+ kills[_player].name||""+"</div>")
                     $("#game_chat").append("<p>"+_player[0]+" entre dans la bataille ! Courage a lui...</p>")
                 })
-                animate()
-               
+                animate()  
             })
             //get the new player who is connected, add the player for the new connected
             socket.on("add_player", function(_pseudo){
                 if (_pseudo != pseudo){
                     player = new Player(Players.length*200+100, 200, _pseudo)
-                    $("#players_connected").append("<div>"+_pseudo+"</div>")
+                    $("#players_connected").append("<div>"+_pseudo+ "-"+ kills[_player].name||""+"</div>")
                     $("#game_chat").append("<p>"+_pseudo+" entre dans la bataille ! Courage a lui...</p>")
                 }
-               
             })
             //remove a player
             socket.on("remove_player", function(_pseudo){
@@ -508,7 +248,6 @@
                         $("#game_chat").append("<p>"+_pseudo+" s'est en allé la queue entre les jambes...</p>")
                     }
                 })
-                
             })
             socket.on("player_disconnect", function(_pseudo){
                 Players.forEach(function(player, index){
@@ -530,8 +269,11 @@
                 circle_bullet = new CircleBullet(data.x, data.y, data.dest_x, data.dest_y, data.pseudo)
             })
         }
-            
-        
+
+
+        function getKeyByValue(object, value) {
+            return Object.keys(object).find(key => object[key] === value);
+            }
     </script>
 </body>
 </html>
