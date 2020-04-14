@@ -11,7 +11,7 @@ class Bullet {
         this.dy = (this.destination_y - this.y)
         this.mag = (Math.sqrt(this.dx*this.dx+this.dy*this.dy))
         this.player = player
-        this.speed=18
+        this.speed=14
         
         this.velocity_x = (this.dx/this.mag)*this.speed
         this.velocity_y = (this.dy/this.mag)*this.speed

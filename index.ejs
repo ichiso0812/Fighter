@@ -50,9 +50,6 @@
                     </div>
                     
                     <div id="players_connected">
-                        <div>
-                            <h2>futurs ball'z</h2>
-                        </div>
                     </div>
 
                     <div id="game_chat">
@@ -108,7 +105,7 @@
         $("#game, #rooms_list").hide()
 
         function animate(){
-            requestAnimationFrame(animate)
+            setTimeout(animate, 1000/60)
             ctx.clearRect(0,0,game_dim.width, game_dim.height)
             var active_players = []
            
@@ -126,7 +123,6 @@
             if (game_state=="play"){
 
                 active_players.forEach(function(player, index){
-                
                     player.update()
                     
                     $(".active_players .player").eq(index).html(player.name)
@@ -195,6 +191,10 @@
                     launch_new_round_timer()
                 }
             }
+            $("#players_connected").html("")
+            Players.forEach(function(_player){
+                $("#players_connected").prepend("<div>"+_player.name+ "-"+ kills[_player.name]+"</div>")
+            })
         }
         function launch_new_round_timer(){
             if (new_round_timer > 0){
@@ -217,26 +217,32 @@
            
             $(".room_name").html("room name: " + room_name)
             //NEW CONNECTION
-            socket = io.connect(location +"?room_name=" +room_name)
+            socket = io.connect(location +"?room_name=" +room_name.replace(" ", "_"))
 
             socket.emit("add_player", {pseudo: pseudo})
 
             //get all players for a new connected
             socket.on("add_players_new_connected", function(players){
-                $("#players_connected").html("<div><h2>Futurs ball'z</h2></div>")
+                $("#players_connected").html("")
                 players.forEach(function(_player){
+                    if( typeof(kills[_player[0]])=="undefined"){
+                        kills[_player[0]] = 0
+                    }
                     player = new Player(Players.length*200+100, 200, _player[0])
                     //$("#players_connected").append("<p class="+_player[0]+">"+_player[0]+"</p>")
-                    $("#players_connected").append("<div>"+_player[0]+ "-"+ kills[_player].name||""+"</div>")
+                    $("#players_connected").prepend("<div>"+_player[0]+ "-"+ kills[_player[0]]+"</div>")
                     $("#game_chat").append("<p>"+_player[0]+" entre dans la bataille ! Courage a lui...</p>")
                 })
                 animate()  
             })
             //get the new player who is connected, add the player for the new connected
             socket.on("add_player", function(_pseudo){
+                if( typeof(kills[_pseudo])=="undefined"){
+                    kills[_pseudo] = 0
+                }
                 if (_pseudo != pseudo){
                     player = new Player(Players.length*200+100, 200, _pseudo)
-                    $("#players_connected").append("<div>"+_pseudo+ "-"+ kills[_player].name||""+"</div>")
+                    $("#players_connected").prepend("<div>"+_pseudo+ "-"+ kills[_player].name||""+"</div>")
                     $("#game_chat").append("<p>"+_pseudo+" entre dans la bataille ! Courage a lui...</p>")
                 }
             })
@@ -273,7 +279,7 @@
 
         function getKeyByValue(object, value) {
             return Object.keys(object).find(key => object[key] === value);
-            }
+        }
     </script>
 </body>
 </html>

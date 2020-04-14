@@ -18,8 +18,8 @@ $(".choose_pseudo_submit").click(function(e){
 //create room
 $("#submit_new_room").click(function(){
     $.post(
-        "/create-room/"+$("#room_name_input").val(),
-        {room_name: $("#room_name_input").val()},
+        "/create-room/"+$("#room_name_input").val().replace(" ", "_"),
+        {room_name: $("#room_name_input").val().replace(" ", "_")},
         function(data){
             if (data=="success"){
                 room_name = $("#room_name_input").val()
@@ -42,7 +42,7 @@ $("#refresh").click(function(e){
         function(data){
             $(".list_room").html("")
             data.forEach(function(_room){
-                $(".list_room").append("<div class='room'><div><h2>"+_room+"</h2></div><div><button class='cta join_room' id='join_room_"+_room+"' data-name='"+_room+"'>Rejoindre</button></div></div>")
+                $(".list_room").append("<div class='room'><div><h2>"+_room.replace("_", " ")+"</h2></div><div><button class='cta join_room' id='join_room_"+_room.replace("_", " ")+"' data-name='"+_room.replace("_", " ")+"'>Rejoindre</button></div></div>")
                 $("#join_room_"+_room).click(function(){
                     room_name = $(this).attr("data-name")
                     initialize()

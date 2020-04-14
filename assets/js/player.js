@@ -19,8 +19,8 @@ class Player {
             socket.emit("end_round", {looser:this.name})
             Players.forEach((_player, index)=>{
                 if (_player.name==this.name){
-                    winner_index = index== 0 ? 1 : 0
-                    kills[Players[winner_index].name]
+                    var winner_index = index== 0 ? 1 : 0
+                    kills[Players[winner_index].name] +=1
 
                     Players.splice(index, 1)
                     Players.push(this)
